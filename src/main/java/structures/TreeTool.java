@@ -28,7 +28,7 @@ public class TreeTool {
      * @param databaseTool tool that can be queried to get recipes for items
      */
     private static void populateChildren(TreeNode node, BaseDatabaseTool databaseTool) {
-        Recipe recipe = databaseTool.getRecipeForId(node.getItemId());
+        Recipe recipe = databaseTool.getRecipeForId(node.getItemId()).blockingGet();
         if(recipe != Recipe.EMPTY) {
             List<Ingredient> inputs = recipe.getInputs();
             List<TreeNode> children = new ArrayList<>();

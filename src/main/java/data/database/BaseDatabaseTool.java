@@ -1,19 +1,24 @@
 package data.database;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import structures.Item;
 import structures.Recipe;
 
 import java.util.List;
-import java.util.Map;
 
 public interface BaseDatabaseTool {
 
-    void setDatabaseBuildVersion(int version);
-    int getDatabaseBuildVersion();
-    Recipe getRecipeForId(int id);
-    void putRecipe(Recipe recipe);
-    void putRecipes(List<Recipe> recipes);
-    void putItem(int id, String name);
-    void putItems(Map<Integer, String> items);
-    String getItemNameForId(int id);
+    void setupDatabase();
+    Completable resetDatabase();
+    Completable setDatabaseBuildVersion(int version);
+    Single<Integer> getDatabaseBuildVersion();
+    Single<Recipe> getRecipeForId(int id);
+    Completable putRecipe(Recipe recipe);
+    Completable putRecipes(List<Recipe> recipes);
+    Completable putItem(int id, String name);
+    Completable putItems(List<Item> items);
+    Single<String> getItemNameForId(int id);
+    Single<Integer> getItemIdForName(String name);
 
 }

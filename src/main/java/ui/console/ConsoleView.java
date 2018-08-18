@@ -1,11 +1,11 @@
 package ui.console;
 
-import io.reactivex.*;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 
 public class ConsoleView implements ConsoleContract.View {
 
@@ -14,13 +14,32 @@ public class ConsoleView implements ConsoleContract.View {
     private Observable<String> inputObservable;
     private Observer<String> inputObserver;
     private Disposable inputDisposable;
-    private Disposable resultDisposable;
-    private CountDownLatch countDownLatch;
 
     public ConsoleView() {
         presenter = new ConsolePresenter(this);
-        scanner = new Scanner(System.in);
+        presenter.onStart(new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(String s) {
+                System.out.print("\r" + s);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
         printWelcomeMessage();
+        scanner = new Scanner(System.in);
         inputObservable = Observable.create(subscriber -> {
            while(!subscriber.isDisposed()) {
                String input = scanner.nextLine();
@@ -40,6 +59,7 @@ public class ConsoleView implements ConsoleContract.View {
             @Override
             public void onNext(String s) {
                 try {
+                    s = s.replaceAll("'", "''");
                     String[] split = s.split(",");
                     String itemName = split[0];
                     int quantity = Integer.parseInt(split[1]);
@@ -62,45 +82,23 @@ public class ConsoleView implements ConsoleContract.View {
             }
         };
         inputObservable.subscribe(inputObserver);
+
     }
 
     private void printWelcomeMessage() {
         print("Welcome to HowDoICraftGW2, now with RxJava!\n");
-        print("Please follow the instructions to craft the item(s) you wish to craft.\n");
+        print("Please enter the item name and quantity you'd like to craft.\n");
+        print("Follow this pattern: 'item name,quantity', or: 'Zojja's Reaver,1' (with no quotes).\n");
+        print("Type 'quit' to quit. Also, do be warned that some crafting steps are very long, scroll up to not miss ingredients!");
     }
 
     private void reset() {
         inputObservable.subscribe(inputObserver);
     }
 
-    private void makeCraftingRequest(String itemName, int quantity) throws InterruptedException {
+    private void makeCraftingRequest(String itemName, int quantity) {
         Observable<String> result = presenter.processRequest(itemName, quantity);
-        Observer<String> resultObserver = new Observer<String>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                resultDisposable = d;
-            }
-
-            @Override
-            public void onNext(String s) {
-                System.out.println(s);
-                countDownLatch.countDown();
-                resultDisposable.dispose();
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                System.err.println(e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-        result.subscribeOn(Schedulers.io()).subscribe(resultObserver);
-        countDownLatch = new CountDownLatch(1);
-        countDownLatch.await();
+        result.subscribeOn(Schedulers.io()).blockingSubscribe(System.out::println);
         reset();
     }
 

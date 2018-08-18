@@ -1,11 +1,12 @@
 import data.database.BaseDatabaseTool;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import structures.*;
 
 import java.util.List;
-import java.util.Map;
 
 public class TreeToolTest {
 
@@ -47,57 +48,81 @@ public class TreeToolTest {
         recipeE.addIngredient(ingredientED);
         mockDatabase = new BaseDatabaseTool() {
             @Override
-            public void setDatabaseBuildVersion(int version) {
+            public void setupDatabase() {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
 
             @Override
-            public int getDatabaseBuildVersion() {
+            public Completable resetDatabase() {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
 
             @Override
-            public Recipe getRecipeForId(int id) {
+            public Completable setDatabaseBuildVersion(int version) {
+                throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
+            }
+
+            @Override
+            public Single<Integer> getDatabaseBuildVersion() {
+                throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
+            }
+
+            @Override
+            public Single<Recipe> getRecipeForId(int id) {
+                Recipe requestedRecipe;
                 switch(id) {
                     case 1: // A
-                        return recipeA;
+                        requestedRecipe = recipeA;
+                        break;
                     case 2: // B
-                        return recipeB;
+                        requestedRecipe = recipeB;
+                        break;
                     case 3: // C
-                        return recipeC;
+                        requestedRecipe = recipeC;
+                        break;
                     case 4: // D
-                        return Recipe.EMPTY;
+                        requestedRecipe = Recipe.EMPTY;
+                        break;
                     case 5: // E
-                        return recipeE;
+                        requestedRecipe = recipeE;
+                        break;
                     case 6: // F
-                        return Recipe.EMPTY;
+                        requestedRecipe = Recipe.EMPTY;
+                        break;
                     default:
-                        return Recipe.EMPTY;
+                        requestedRecipe = Recipe.EMPTY;
+                        break;
                 }
+                return Single.just(requestedRecipe);
             }
 
             @Override
-            public void putRecipe(Recipe recipe) {
+            public Completable putRecipe(Recipe recipe) {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
 
             @Override
-            public void putRecipes(List<Recipe> recipes) {
+            public Completable putRecipes(List<Recipe> recipes) {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
 
             @Override
-            public void putItem(int id, String name) {
+            public Completable putItem(int id, String name) {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
 
             @Override
-            public void putItems(Map<Integer, String> items) {
+            public Completable putItems(List<Item> items) {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
 
             @Override
-            public String getItemNameForId(int id) {
+            public Single<String> getItemNameForId(int id) {
+                throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
+            }
+
+            @Override
+            public Single<Integer> getItemIdForName(String name) {
                 throw new UnsupportedOperationException("This function is not available for TreeToolTest.");
             }
         };
